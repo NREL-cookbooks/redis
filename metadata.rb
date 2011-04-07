@@ -11,6 +11,7 @@ recipe "redis::source", "Installs redis from source and adds init script"
 end
 
 depends "build-essential"
+depends "logrotate"
 
 attribute "redis/version",
   :display_name => "Redis version",

@@ -56,7 +56,7 @@ unless `ps -A -o command | grep "[r]edis"`.include?(node[:redis][:version])
 
   move_bins = []
   node[:redis][:bins].each { |bin|
-    unless File.exists?("#{node[:redis][:dir]}/bin/#{bin}") && File.read("#{node[:redis][:dir]}/bin/#{bin}") == File.read("/opt/src/redis-#{node[:redis][:version]}/src/#{bin}")
+    if(!File.exists?("#{node[:redis][:dir]}/bin/#{bin}") || !File.exists?("/opt/src/redis-#{node[:redis][:version]}/src/#{bin}") || (File.read("#{node[:redis][:dir]}/bin/#{bin}") != File.read("/opt/src/redis-#{node[:redis][:version]}/src/#{bin}")))
       move_bins << "cp src/#{bin} #{node[:redis][:dir]}/bin/"
     end
   }
@@ -88,13 +88,15 @@ template node[:redis][:config] do
   owner "redis"
   group "redis"
   mode 0644
-  backup false
 end
 
 template "/etc/init.d/redis" do
-  source "redis.init.erb"
+  if platform?("centos", "redhat", "fedora")
+    source "redhat.init.erb"
+  else
+    source "redis.init.erb"
+  end
   mode 0755
-  backup false
 end
 
 [File.join(node[:redis][:datadir], node[:redis][:appendfilename]), 
@@ -112,4 +114,10 @@ service "redis" do
   action [:enable, :start]
   subscribes :restart, resources(:template => node[:redis][:config])
   subscribes :restart, resources(:template => "/etc/init.d/redis")
+end
+
+logrotate_app "redis" do
+  path node[:redis][:logfile]
+  rotate 10
+  create "644 redis redis"
 end

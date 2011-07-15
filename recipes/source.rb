@@ -20,6 +20,7 @@
 #
 
 include_recipe "build-essential"
+include_recipe "iptables::redis"
 
 user "redis" do
   comment "Redis Administrator"

@@ -28,7 +28,9 @@ user "redis" do
   shell "/bin/false"
 end
 
-[node[:redis][:dir], "#{node[:redis][:dir]}/bin", node[:redis][:datadir]].each do |dir|
+node.set[:redis][:pidfile] = "#{node[:redis][:pid_dir]}/redis.pid"
+
+[node[:redis][:pid_dir], node[:redis][:datadir]].each do |dir|
   directory dir do
     owner "redis"
     group "redis"
@@ -37,43 +39,21 @@ end
   end
 end
 
-unless `ps -A -o command | grep "[r]edis"`.include?(node[:redis][:version])
-  # ensuring we have this directory
-  directory "/opt/src"
+remote_file "#{Chef::Config[:file_cache_path]}/redis-#{node[:redis][:version]}.tar.gz" do
+  source "http://redis.googlecode.com/files/redis-#{node[:redis][:version]}.tar.gz"
+  action :create_if_missing
+end
 
-  remote_file "/opt/src/redis-#{node[:redis][:version]}.tar.gz" do
-    source node[:redis][:source]
-    checksum node[:redis][:checksum]
-    action :create_if_missing
-  end
-
-  bash "Compiling Redis #{node[:redis][:version]} from source" do
-    cwd "/opt/src"
-    code <<-EOH
-      tar zxf redis-#{node[:redis][:version]}.tar.gz
-      cd redis-#{node[:redis][:version]} && make
-    EOH
-  end
-
-  move_bins = []
-  node[:redis][:bins].each { |bin|
-    if(!File.exists?("#{node[:redis][:dir]}/bin/#{bin}") || !File.exists?("/opt/src/redis-#{node[:redis][:version]}/src/#{bin}") || (File.read("#{node[:redis][:dir]}/bin/#{bin}") != File.read("/opt/src/redis-#{node[:redis][:version]}/src/#{bin}")))
-      move_bins << "cp src/#{bin} #{node[:redis][:dir]}/bin/"
-    end
-  }
-  unless move_bins.size == 0
-    bash "set_up_redis" do
-      cwd "/opt/src/redis-#{node[:redis][:version]}"
-      code <<-EOH
-        #{move_bins.join("; ")}
-      EOH
-    end
-  end
-
-  environment = File.read('/etc/environment')
-  unless environment.include? node[:redis][:dir]
-    File.open('/etc/environment', 'w') { |f| f.puts environment.gsub(/PATH="/, "PATH=\"#{node[:redis][:dir]}/bin:") }
-  end
+bash "Compiling Redis #{node[:redis][:version]} from source" do
+  cwd Chef::Config[:file_cache_path]
+  code <<-EOH
+    tar zxf redis-#{node[:redis][:version]}.tar.gz
+    cd redis-#{node[:redis][:version]}
+    make
+    make PREFIX=#{node[:redis][:dir]} install
+  EOH
+  not_if "#{node[:redis][:dir]}/bin/redis-server -v 2>&1 | grep 'Redis server version #{::Regexp.escape(node[:redis][:version])} '"
+  notifies :restart, "service[redis]"
 end
 
 file node[:redis][:logfile] do

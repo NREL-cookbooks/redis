@@ -1,16 +1,13 @@
-default[:redis][:version]   = "2.2.2"
-default[:redis][:checksum]  = "a64c32f37e67bdeabbab74f8413a960a8d42e381"
-default[:redis][:source]    = "http://redis.googlecode.com/files/redis-#{redis[:version]}.tar.gz"
-default[:redis][:bins]      = %w(redis-benchmark redis-cli redis-server mkreleasehdr.sh redis-check-aof redis-check-dump)
+default[:redis][:version]   = "2.4.4"
 
-default[:redis][:dir]       = "/opt/redis-#{redis[:version]}"
+default[:redis][:dir]       = "/opt/redis"
 default[:redis][:datadir]   = "/var/db/redis"
 default[:redis][:config]    = "/etc/redis.conf"
 default[:redis][:logfile]   = "/var/log/redis.log"
-default[:redis][:pidfile]   = "/var/run/redis.pid"
+default[:redis][:pid_dir]   = "/var/run/redis"
 
 default[:redis][:port]        = 6379
-default[:redis][:timeout]     = 300
+default[:redis][:timeout]     = 0
 default[:redis][:databases]   = 16
 default[:redis][:maxmemory]   = nil
 default[:redis][:snapshots]   = {
@@ -35,7 +32,7 @@ default[:redis][:slave_serve_stale_data] = true
 default[:redis][:maxmemory_policy]  = 'volatile-lru'
 default[:redis][:maxmemory_samples] = 3
 
-default[:redis][:appendonly]                = true
+default[:redis][:appendonly]                = false
 default[:redis][:appendfilename]            = 'appendonly.aof'
 default[:redis][:appendfsync]               = 'everysec'
 default[:redis][:no_appendfsync_on_rewrite] = false

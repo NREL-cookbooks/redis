@@ -98,7 +98,7 @@ service "redis" do
 end
 
 logrotate_app "redis" do
-  path node[:redis][:logfile]
+  path [node[:redis][:logfile]]
   rotate 10
   create "644 redis redis"
 end

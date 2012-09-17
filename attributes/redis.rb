@@ -1,4 +1,4 @@
-default[:redis][:version]   = "2.4.4"
+default[:redis][:version]   = "2.4.17"
 
 default[:redis][:dir]       = "/opt/redis"
 default[:redis][:datadir]   = "/var/db/redis"

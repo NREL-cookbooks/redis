@@ -71,6 +71,13 @@ template node[:redis][:config] do
   mode 0644
 end
 
+template "/etc/profile.d/redis.sh" do
+  source "profile.sh.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
 template "/etc/init.d/redis" do
   if platform?("centos", "redhat", "fedora")
     source "redhat.init.erb"

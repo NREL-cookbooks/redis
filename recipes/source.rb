@@ -52,7 +52,7 @@ bash "Compiling Redis #{node[:redis][:version]} from source" do
     make
     make PREFIX=#{node[:redis][:dir]} install
   EOH
-  not_if "#{node[:redis][:dir]}/bin/redis-server -v 2>&1 | grep 'Redis server version #{::Regexp.escape(node[:redis][:version])} '"
+  not_if "#{node[:redis][:dir]}/bin/redis-server -v 2>&1 | grep 'Redis server v=#{::Regexp.escape(node[:redis][:version])} '"
   notifies :restart, "service[redis]"
 end
 

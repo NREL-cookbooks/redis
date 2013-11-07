@@ -40,7 +40,7 @@ node.set[:redis][:pidfile] = "#{node[:redis][:pid_dir]}/redis.pid"
 end
 
 remote_file "#{Chef::Config[:file_cache_path]}/redis-#{node[:redis][:version]}.tar.gz" do
-  source "http://redis.googlecode.com/files/redis-#{node[:redis][:version]}.tar.gz"
+  source "http://download.redis.io/releases/redis-#{node[:redis][:version]}.tar.gz"
   action :create_if_missing
 end
 

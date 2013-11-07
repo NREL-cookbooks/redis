@@ -77,7 +77,7 @@ logfile <%= @node[:redis][:logfile] %>
 # Specify the syslog identity.
 <%= "syslog-ident #{@node[:redis][:syslog_ident]}" if @node[:redis][:syslog_enabled] %>
 
-# Specify the syslog facility.  Must be USER or between LOCAL0-LOCAL7.
+# Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.
 <%= "syslog-facility #{@node[:redis][:syslog_facility]}" if @node[:redis][:syslog_enabled] %>
 
 # Set the number of databases. The default database is DB 0, you can select
@@ -332,7 +332,7 @@ maxmemory <%= @node[:redis][:maxmemory].to_i * 1024 * 1024 %>
 # volatile-lru -> remove the key with an expire set using an LRU algorithm
 # allkeys-lru -> remove any key accordingly to the LRU algorithm
 # volatile-random -> remove a random key with an expire set
-# allkeys->random -> remove a random key, any key
+# allkeys-random -> remove a random key, any key
 # volatile-ttl -> remove the key with the nearest expire time (minor TTL)
 # noeviction -> don't expire at all, just return an error on write operations
 # 
@@ -593,6 +593,12 @@ client-output-buffer-limit pubsub 32mb 8mb 60
 # a good idea. Most users should use the default of 10 and raise this up to
 # 100 only in environments where very low latency is required.
 hz 10
+
+# When a child rewrites the AOF file, if the following option is enabled
+# the file will be fsync-ed every 32 MB of data generated. This is useful
+# in order to commit the file to the disk more incrementally and avoid
+# big latency spikes.
+aof-rewrite-incremental-fsync yes
 
 ################################## INCLUDES ###################################
 
